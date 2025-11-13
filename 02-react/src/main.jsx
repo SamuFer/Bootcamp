@@ -4,7 +4,8 @@ import './index.css'
 import App from './App.jsx'
 
 createRoot(document.getElementById('root')).render(
-  <StrictMode>
+  // al Modo Estricto (StrictMode) -> usa el doble-invocar donde todo proceso se repite una segunda vez para la detección de errores.
+  <StrictMode> 
     <App />
   </StrictMode>,
 )

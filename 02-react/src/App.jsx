@@ -1,128 +1,73 @@
-import data from './data.json'
+import { useState } from "react";
 
-console.log(data)
+import Header from './components/Header.jsx'
+import Footer from './components/Footer.jsx'
+import Pagination from  './components/Pagination.jsx'
+import JobListings from './components/JobListings.jsx'
+import SearchFormSection from "./components/SearchFormSection.jsx";
+
+import jobsData from './data.json'
 
 // ¿Cómo podría renderizar una lista de elementos/componentes para mostrarlos en la UI?
 
-function Header () {
-  return (
-    <header>
-        <h1>
-            <svg fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <polyline points="16 18 22 12 16 6"></polyline>
-                <polyline points="8 6 2 12 8 18"></polyline>
-            </svg>
-            DevJobs
-        </h1>
-        <nav>
-            <a href="index.html">Inicio</a>
-            <a href="">Empleos</a>
-            <a href="">Empresas</a>
-            <a href="">Salarios</a>
-        </nav>
-    </header>
-  )
-}
-
-function Footer () {
-  return (
-    <footer>
-        <small>&copy; 2025 DevJobs. Todos los derechos reservados.</small>
-    </footer>
-  )
-}
+const RESULT_PER_PAGE = 4;
 
 function App() {
+  const [filters, setFilters] = useState({
+      technology: '',
+      location: '',
+      experienceLevel: ''
+    })
+
+  const [textToFilter, setTextToFilter] = useState('')
+
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const jobsFilteredByFilters = jobsData.filter(job => {
+    return (
+      (filters.technology === '' || job.data.technology === filters.technology) // cuando filters.technology === '' es verdadero, la condición completa se evalúa como true para todos los trabajos, y el resultado es una copia completa del array original, sin filtrar.
+
+    )
+  })
+
+  
+  const jobsWithTextFilter = textToFilter === ''
+    ? jobsFilteredByFilters
+    : jobsFilteredByFilters.filter(job => {
+      return job.titulo.toLowerCase().includes(textToFilter.toLowerCase())
+    })
+  const totalPages = Math.ceil(jobsWithTextFilter.length / RESULT_PER_PAGE);
+
+  const pagedResults = jobsWithTextFilter.slice( 
+    (currentPage - 1) * RESULT_PER_PAGE, // Pagina 1 -> 0, Pagina 2 -> 5,  Pagina 3 -> 10
+    currentPage * RESULT_PER_PAGE        // Pagina 1 -> 5, Pagina 2 -> 10, Pagina 3 -> 15
+  );
+
+  console.log("-----> render App")
+
+  const handlePageChange = (page) => {
+    console.log("Cambio a la pagina:", page);
+    setCurrentPage(page);
+  }
+
+  const handleSearch = (filters) => {
+    setFilters(filters)
+    setCurrentPage(1)
+  }
+
+  const handleTextFilter = (newTextToFilter) => {
+    setTextToFilter(newTextToFilter)
+    setCurrentPage(1)
+  }
 
   return (
     <>
     <Header />
     <main>
-        <section className="jobs-search">
-            <h1>Encuentra tu proximo trabajo</h1>
-            <p>Explora miles de oportunidades en el sector tecnologico.</p>
-            <form id="empleos-search-form" role="search">
-                <div className="search-bar">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-                        className="icon icon-tabler icons-tabler-outline icon-tabler-search">
-                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                        <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" />
-                        <path d="M21 21l-6 -6" />
-                    </svg>
-                    <input name="search" id="empleos-search-input" required type="text"
-                        placeholder="Buscar trabajos, empresas o habilidades"/>
-                </div>
-
-                <div className="search-filters">
-                    <select name="technology" id="filter-technology">
-                        <option value="">Tecnología</option>
-                        <optgroup label="Tecnologías populares">
-                            <option value="javascript">JavaScript</option>
-                            <option value="python">Python</option>
-                            <option value="react">React</option>
-                            <option value="nodejs">Node.js</option>
-                        </optgroup>
-                        <option value="java">Java</option>
-                        <hr />
-                        <option value="csharp">C#</option>
-                        <option value="c">C</option>
-                        <option value="c++">C++</option>
-                        <hr />
-                        <option value="ruby">Ruby</option>
-                        <option value="php">PHP</option>
-                    </select>
-
-                    <select name="location" id="filter-location">
-                        <option value="">Ubicación</option>
-                        <option value="remoto">Remoto</option>
-                        <option value="cdmx">Ciudad de México</option>
-                        <option value="guadalajara">Guadalajara</option>
-                        <option value="monterrey">Monterrey</option>
-                        <option value="barcelona">Barcelona</option>
-                    </select>
-
-                    <select name="experience-level" id="filter-experience-level">
-                        <option value="">Nivel de experiencia</option>
-                        <option value="junior">Junior</option>
-                        <option value="mid">Mid-level</option>
-                        <option value="senior">Senior</option>
-                        <option value="lead">Lead</option>
-                    </select>
-                </div>
-            </form>
-            <span id="filter-selected-value"></span>
-        </section>
-
+        <SearchFormSection onSearch={handleSearch} onTextFilter={handleTextFilter} />
         <section>
-            <div>
-                <h2>Resultados de busqueda</h2>
-            </div>
-
-            <div className="jobs-listings">
-                {/* Aquí se insertan los empleos dinámicamente */}
-            </div>
-
-            <nav className="pagination">
-                <a id="atras" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                        <path d="M15 6l-6 6l6 6" />
-                    </svg></a>
-                <a className="is-active" href="#">1</a>
-                <a href="#">2</a>
-                <a href="#">3</a>
-                <a href="#">4</a>
-                <a href="#">5</a>
-                <a id="siguiente" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
-                        className="icon icon-tabler icons-tabler-outline icon-tabler-chevron-right">
-                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                        <path d="M9 6l6 6l-6 6" />
-                    </svg></a>
-            </nav>
-
+            <JobListings jobs={pagedResults} />
+            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange}/>
         </section>
     </main>
     <Footer />
