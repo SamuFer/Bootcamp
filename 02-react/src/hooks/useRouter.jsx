@@ -1,0 +1,29 @@
+import { useState, useEffect } from "react";
+
+export function useRouter(){
+  const [currentPath, setCurrentPath] = useState(window.location.pathname)
+
+  useEffect(() => { // detectar cambios en la URL -> single page application
+      const handleLocationChange = () => {
+        setCurrentPath(window.location.pathname);
+      }
+
+      window.addEventListener('popstate', handleLocationChange);
+
+      return () => {
+        window.removeEventListener('popstate', handleLocationChange);
+      }
+    
+  }, [])
+
+  function navigateTo(path){
+    window.history.pushState({}, '', path);
+    window.dispatchEvent(new PopStateEvent('popstate'));
+  }
+
+  return{
+    currentPath,
+    navigateTo
+  }
+
+}

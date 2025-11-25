@@ -1,16 +1,20 @@
-import { useId } from "react"
+import { useId, useState } from "react"
 
-export default function SearchFormSection({onTextFilter, onSearch}) {
+let timeoutId = null
 
-    const idText = useId()
-    const idTechnology = useId()
-    const idLocation = useId()
-    const idExperienceLevel = useId()
+const useSearchForm = ({idTechnology, idLocation, idExperienceLevel, idText, onSearch, onTextFilter}) => {
+    const [searchText, setSearchText] = useState()
 
     const handleSubmit = (event) => {
+        
         event.preventDefault()
         
-        const formData = new FormData(event.target)
+        // event.target (click:recibiendo) !== event.currentTarget(cambio:escuchando)
+        const formData = new FormData(event.currentTarget)
+
+        if (event.target.name === idText) {
+            return // si el cambio viene del input de texto, no hacemos nada aqui, el return corta la ejecucion porque lo manejamos en handleTextChange
+        }
 
         const filters = {
             technology: formData.get(idTechnology),
@@ -23,15 +27,49 @@ export default function SearchFormSection({onTextFilter, onSearch}) {
 
     const handleTextChange = (event) => {
         const text = event.target.value
-        onTextFilter(text)
+        setSearchText(text) // actualizamos el input inmediatamente
+
+        // debounce: cancelar el timeout anterior
+        if (timeoutId) {
+            clearTimeout(timeoutId)
+        }
+
+        // crear un nuevo timeout
+        timeoutId = setTimeout(() => {
+            onTextFilter(text)
+        },500) // esperar 500ms despues de que el usuario deje de escribir
+
     }
+
+    return {
+        searchText,
+        handleSubmit,
+        handleTextChange 
+        
+    } 
+
+}
+
+
+export default function SearchFormSection({onTextFilter, onSearch}) {
+
+    const idText = useId()
+    const idTechnology = useId()
+    const idLocation = useId()
+    const idExperienceLevel = useId()
+
+    const { 
+        handleSubmit, 
+        handleTextChange } = useSearchForm({idTechnology, idLocation, idExperienceLevel, idText, onSearch, onTextFilter})
+
+    
 
     return (
         <section className="jobs-search">
             <h1>Encuentra tu proximo trabajo</h1>
             <p>Explora miles de oportunidades en el sector tecnologico.</p>
             
-            <form onSubmit={handleSubmit} id="empleos-search-form" role="search">
+            <form onChange={handleSubmit} id="empleos-search-form" role="search">
                 <div className="search-bar">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
@@ -45,7 +83,7 @@ export default function SearchFormSection({onTextFilter, onSearch}) {
                         onChange={handleTextChange}    
                     />
 
-                    <button type="submit" style={{ position: 'absolute', right: '4px' }} >Buscar</button>
+                    {/* <button type="submit" style={{ position: 'absolute', right: '4px' }} >Buscar</button> */}
                 </div>
 
                 <div className="search-filters">

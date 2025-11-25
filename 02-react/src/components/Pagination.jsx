@@ -1,7 +1,7 @@
 import styles from './Pagination.module.css';
 export default function Pagination({currentPage = 1, totalPages = 10, onPageChange}) { // valores prederminados en currentPage y totalPages, solo funcionan si no se les pasa ningun valor desde el componente padre App.jsx
     
-    console.log("-----> render Pagination")
+    
 
     //generar un array de paginas a mostrar
     const pages = Array.from({length: totalPages}, (_, i) => i + 1);

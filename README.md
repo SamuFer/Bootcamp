@@ -70,3 +70,114 @@ Sí, para ver los `console.log` de "render App" y "render Pagination", la aplica
 El `onClick` solo es el **disparador** que inicia el proceso de **re-renderizado** que luego ejecuta esos `console.log`.
 
 **En resumen:** el clic ejecuta la lógica de la función *primero*, y la actualización del estado que ocurre *dentro* de esa lógica es lo que *después* fuerza a React a ejecutar los `console.log` de renderizado.
+
+##
+
+## Explicacion del proceso de navegacion interna de la pagina, SPA(Single Application Page):
+
+Este fragmento de código define un componente de React personalizado llamado Link. Su propósito es crear un enlace (< a >) que permite la navegación de una sola página (SPA - Single Page Application) sin recargar la página completa.
+A continuación, se explica en detalle cada parte del código:
+1. Definición del Componente
+
+
+    ```js
+    export function Link({ href, children, ...props }) {
+        // ...
+    }
+    ```
+- **export function Link(...)**: Define un componente funcional de JavaScript/React llamado Link y lo exporta para que pueda ser utilizado en otras partes de la aplicación.
+- **({ href, children, ...props })**: El componente recibe propiedades (props) de su padre.
+    - **href**: La URL de destino a la que debe apuntar el enlace (por ejemplo, "/about").
+
+    - **children**: El contenido que se coloca dentro de las etiquetas del componente (por ejemplo, el texto "Acerca de" en <Link href="/about">Acerca de</Link>).
+
+    - **...props**: Utiliza el operador de spread (...) para recopilar cualquier otra propiedad adicional que se le pase al componente (como className, target, title, etc.) y las almacena en un objeto llamado props.
+
+2. La Función handleClick
+    ```js
+    const handleClick = (event) => {
+
+    // evitar el comportamiento por defecto del navegador
+    event.preventDefault();
+
+    // cambiar la URL sin recargar la pagina
+    window.history.pushState({}, '', href); 
+
+    // disparar un evento para notificar a la aplicacion que la URL ha cambiado
+    window.dispatchEvent(new PopStateEvent('popstate'));
+    }
+    ```
+    Esta función se ejecuta cuando el usuario hace clic en el enlace.
+
+- **event.preventDefault();**: Esta es la clave del comportamiento SPA. Detiene la acción predeterminada del navegador cuando se hace clic en un enlace (que normalmente es navegar a la nueva URL y recargar toda la página).
+
+- **window.history.pushState({}, '', href)**;: Manipula la API del historial del navegador.
+    - **Cambia la URL visible** en la barra de direcciones del navegador a la especificada en href sin realizar una recarga de página completa.
+    - **{}** y **' '** son parámetros requeridos para el estado y el título (que a menudo se dejan vacíos o con valores predeterminados en este contexto).
+- **window.dispatchEvent(new PopStateEvent('popstate'));**: Dispara manualmente un evento popstate. En una SPA típica, el código principal de la aplicación escucha este evento para detectar cambios de URL y renderizar el componente de vista correcto sin recargar.
+
+3. El Resultado (Renderizado)
+
+```js
+return(
+    <a href={href} {...props} onClick={handleClick}>
+      {children}
+    </a>
+);
+```
+El componente Link renderiza finalmente un elemento HTML < a > -> (enlace):
+- **href={href}**: Establece el atributo href estándar del enlace con la URL proporcionada. Esto es bueno para la accesibilidad y el SEO (motores de búsqueda).
+
+- **{...props}**: Aplica cualquier propiedad adicional que se haya pasado al componente al elemento < a > subyacente.
+
+- **onClick={handleClick}**: Asigna la función handleClick definida anteriormente como el manejador de eventos para el clic.
+
+- **{children}**: Renderiza el contenido que el usuario puso dentro de las etiquetas < Link >...< /Link >.
+
+***En Resumen***
+```
+Este código es la implementación básica de un router o sistema de navegación personalizado en React. 
+Permite a la aplicación cambiar de "página" (o vista) sin recargar la página completa, 
+proporcionando una experiencia de usuario más fluida, similar a una aplicación de escritorio.
+```
+##
+## Expliacion sencilla sobre que es un *CUSTOM HOOK*
+Un "custom hook" es una función en React que te permite extraer y reutilizar lógica con estado o efectos secundarios entre varios componentes. La convención es que su nombre empiece por "use", como useCounter o useFetch, y se crea para organizar y compartir el código que no es de presentación, facilitando que los componentes se centren solo en la interfaz visual. 
+- Características clave:
+    - **{Reutilización de lógica}**: Evita copiar y pegar el mismo código una y otra vez. Puedes mover la lógica común a un "custom hook" y usarla en cualquier otro componente.
+
+    - **{Separación de responsabilidades}**: Permite separar la lógica (como la obtención de datos o el manejo de estado) de la parte visual del componente, haciendo que el código sea más limpio y fácil de leer.
+
+    - **{Convención de nomenclatura}**: Se deben nombrar con el prefijo use, por ejemplo, useMiLogica.
+
+    - **{Encapsulación de estado}**: Pueden usar otros hooks (como useState o useEffect) y encapsular su lógica dentro de una función. 
+
+### Ejemplo sencillo
+Imagina que tienes que gestionar el estado de un contador en varios componentes. En lugar de escribir useState y la lógica de incremento/decremento en cada componente, podrías crear un "custom hook" llamado ***useCounter***:
+```js
+import { useState } from 'react';
+
+function useCounter() {
+  const [count, setCount] = useState(0);
+
+  const increment = () => setCount(count + 1);
+  const decrement = () => setCount(count - 1);
+
+  return { count, increment, decrement };
+}
+```
+Luego, en cualquier componente, simplemente lo llamas para tener la lógica del contador lista:
+```js
+function MiComponente() {
+  const { count, increment, decrement } = useCounter();
+  return (
+    <div>
+      <p>Contador: {count}</p>
+      <button onClick={increment}>+</button>
+      <button onClick={decrement}>-</button>
+    </div>
+  );
+}
+```
+Este es un ejemplo básico que ilustra cómo la lógica del contador se puede reutilizar sin tener que repetirla en cada componente.
+

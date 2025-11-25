@@ -380,11 +380,11 @@ article {
     
     
   }
-  @media screen and (min-width: 1250px) {
+  /* @media screen and (min-width: 1250px) {
     form {
       padding-inline: 0; /* En pantallas grandes, lo eliminamos */
-    }
-  }
+    /* } */
+  /* } */
   h1{
     font-size: 2.5rem;
     margin-bottom: .25rem;

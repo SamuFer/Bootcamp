@@ -6,12 +6,18 @@ import JobCard from '../components/JobCard.jsx'
 export default function JobListings({jobs}) {
     return (
         <> 
-            <div>
-                <h2>Resultados de busqueda</h2>
-            </div>
-
+            
+           
+            
             <div className="jobs-listings">
-                {/* Aquí se insertan los empleos dinámicamente */}
+
+                {
+                    jobs.length === 0 && (
+                        <p style={{textAlign: 'center', padding: '1rem', textWrap: 'balance'}}>No se han encontrado empleos que
+                        coinciden con los criterios de busqueda</p>
+                    )
+                }
+
                 {jobs.map((job) => (
                   <JobCard key={job.id} job={job} />
                 ))}
