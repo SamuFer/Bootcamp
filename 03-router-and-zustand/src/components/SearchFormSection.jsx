@@ -53,7 +53,7 @@ const useSearchForm = ({idTechnology, idLocation, idExperienceLevel, idText, onS
 }
 
 
-export default function SearchFormSection({onTextFilter, onSearch, initialText}) {
+export function SearchFormSection({onTextFilter, onSearch, initialText}) {
 
     const idText = useId()
     const idTechnology = useId()
@@ -102,7 +102,7 @@ export default function SearchFormSection({onTextFilter, onSearch, initialText})
 
                 <div className="search-filters">
                     <select name={idTechnology} id="filter-technology">
-                        <option value="">Tecnología</option>
+                        <option value=''>Tecnología</option>
                         <optgroup label="Tecnologías populares">
                             <option value="javascript">JavaScript</option>
                             <option value="python">Python</option>
