@@ -4,7 +4,7 @@ import { useSearchParams } from "react-router";
 import {Pagination} from  '../components/Pagination.jsx'
 import {JobListings} from '../components/JobListings.jsx'
 import {SearchFormSection} from "../components/SearchFormSection.jsx";
-import { useRouter } from '../hooks/useRouter.jsx'
+
 
 // import jobsData from '../data.json'
 
@@ -26,14 +26,12 @@ const useFilters = () => {
 
   const [currentPage, setCurrentPage] = useState(() => {
     const page = Number(searchParams.get('page'))
-    return Number.isNaN(page) ? page : 1
+    return Number.isNaN(page) || page < 1 ? 1 : page
   });
 
   const [jobs, setJobs] = useState([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
-
-  const {navigateTo} = useRouter()
 
   useEffect(() => {
     async function fetchJobs() {
@@ -48,7 +46,7 @@ const useFilters = () => {
         if (filters.location) params.append('type', filters.location)
         if (filters.experienceLevel) params.append('level', filters.experienceLevel)
 
-        const offset = (currentPage -1) * RESULT_PER_PAGE // calcular el offset para la paginacion que es el numero de resultados a saltar
+        const offset = (currentPage - 1) * RESULT_PER_PAGE // calcular el offset para la paginacion que es el numero de resultados a saltar
         params.append('limit', RESULT_PER_PAGE) // numero de resultados por pagina
         params.append('offset', offset) // numero de resultados a saltar segun la pagina actual
 
@@ -69,10 +67,13 @@ const useFilters = () => {
     }
 
     fetchJobs()
-  }, [filters, textToFilter, currentPage]) // array vacio para que solo se ejecute una vez al montar el componente, porque todavia no hay dependencias que vigilar o filtrar
+  }, [filters, currentPage, textToFilter ]) // array vacio para que solo se ejecute una vez al montar el componente, porque todavia no hay dependencias que vigilar o filtrar
 
    useEffect(() => {
-    setSearchParams((params) => {
+    setSearchParams(() => {
+      // Clear all existing params
+      const params = new URLSearchParams()
+      // Add only needed params
       if (textToFilter) params.set('text', textToFilter)
       if (filters.technology) params.set('technology', filters.technology)
       if (filters.location) params.set('type', filters.location)
@@ -111,6 +112,7 @@ const useFilters = () => {
     totalPages,
     currentPage,
     textToFilter,
+    filters,
     handlePageChange,
     handleSearch,
     handleTextFilter
@@ -126,6 +128,7 @@ export default function SearchPage() {
     totalPages,
     currentPage,
     textToFilter,
+    filters,
     handlePageChange,
     handleSearch,
     handleTextFilter
@@ -145,6 +148,9 @@ export default function SearchPage() {
           initialText={textToFilter}
           onSearch={handleSearch}
           onTextFilter={handleTextFilter}
+          initialTechnology={filters.technology}
+          initialLocation={filters.location}
+          initialLevel={filters.experienceLevel}
         />
 
         <section>
