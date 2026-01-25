@@ -1,6 +1,26 @@
 import { NavLink } from "react-router" // NavLink nos permite saber si la ruta está activa o no
 import { Link } from "./Link"
+import { useAuthStore } from "../store/AuthStore";
+import { useFavoritesStore } from "../store/FavoritesStore";
+
 export default function Header () {
+  const {isLoggedIn} = useAuthStore();
+  const { countFavorites } = useFavoritesStore();
+  const numberOfFavorites = countFavorites();
+
+  const HeaderUserButton = () => {
+    const { isLoggedIn, login, logout } = useAuthStore()
+    const {clearFavorites} = useFavoritesStore();
+
+  const handleLogout = () => {
+      logout();
+      clearFavorites();
+    }
+  return isLoggedIn
+    ? <button onClick={handleLogout} className="btn-logout">Cerrar sesión</button>
+    : <button onClick={login} className="btn-login">Iniciar sesión</button>
+  }
+
   return (
     <header>
         <Link href="/" style={{textDecoration:'none'}}>
@@ -20,7 +40,15 @@ export default function Header () {
             <NavLink 
               className={({ isActive }) => isActive ? 'nav-link-active' : ''}
               to="/search">Empleos</NavLink>
-        </nav>
+            {isLoggedIn && (  
+              <NavLink 
+                className={({ isActive }) => isActive ? 'nav-link-active' : ''}
+                to="/profile">
+                  Profile ❤️ {numberOfFavorites}
+              </NavLink>
+            )}
+        </nav> 
+        <HeaderUserButton />
     </header>
   )
 }
